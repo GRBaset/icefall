@@ -45,6 +45,7 @@ export CUDA_VISIBLE_DEVICES="0,1,2,3"
 import argparse
 import copy
 import logging
+from math import inf
 import warnings
 from pathlib import Path
 from shutil import copyfile
@@ -192,7 +193,6 @@ def get_parser():
         default="data/lang_bpe_500/bpe.model",
         help="Path to the BPE model",
     )
-
 
     parser.add_argument(
         "--use-validated-set",
@@ -721,7 +721,7 @@ def compute_validation_loss(
 
     if world_size > 1:
         tot_loss.reduce(loss.device)
-
+        
     loss_value = tot_loss["loss"] / tot_loss["frames"]
     if loss_value < params.best_valid_loss:
         params.best_valid_epoch = params.cur_epoch
@@ -878,7 +878,12 @@ def train_one_epoch(
                     tb_writer, "train/valid_", params.batch_idx_train
                 )
 
-    loss_value = tot_loss["loss"] / tot_loss["frames"]
+    # WORKAROUND
+    if tot_loss["frames"] == 0:
+        loss_value = float("inf")
+    else:
+        loss_value = tot_loss["loss"] / tot_loss["frames"]
+        
     params.train_loss = loss_value
     if params.train_loss < params.best_train_loss:
         params.best_train_epoch = params.cur_epoch

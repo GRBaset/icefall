@@ -46,8 +46,10 @@ def get_args():
 def normalize_text(utt: str, language: str) -> str:
     utt = re.sub(r"[{0}]+".format("-"), " ", utt)
     utt = re.sub("’", "'", utt)
-    if language == "en":
+    if language in ["en", "tok"]:
         return re.sub(r"[^a-zA-Z\s]", "", utt).upper()
+    elif language == "es":
+        return re.sub(r"[^A-ZÁÉÍÓÚÜÑ\s]", "", utt.upper())
     elif language == "fr":
         return re.sub(r"[^A-ZÀÂÆÇÉÈÊËÎÏÔŒÙÛÜ' ]", "", utt).upper()
     elif language == "pl":
@@ -58,7 +60,7 @@ def normalize_text(utt: str, language: str) -> str:
         # None en/zh-yue tokens are manually removed here
 
         # fmt: off
-        tokens_to_remove = ["，", "。", "？", "！", "?", "!", "‘", "、", ",", "\.", ":", ";", "「", "」", "“", "”", "~", "—", "ㄧ", "《", "》", "…", "⋯", "·", "﹒", "．", "：", "︰", "﹖", "（", "）", "－", "～", "；", "￼", "⠀", "﹔", "／", "Ａ", "Ｂ", "–", "‧"]
+        tokens_to_remove = ["，", "。", "？", "！", "?", "!", "‘", "、", ",", ".", ":", ";", "「", "」", "“", "”", "~", "—", "ㄧ", "《", "》", "…", "⋯", "·", "﹒", "．", "：", "︰", "﹖", "（", "）", "－", "～", "；", "￼", "⠀", "﹔", "／", "Ａ", "Ｂ", "–", "‧"]
 
         # fmt: on
         utt = utt.upper().replace("\\", "")
